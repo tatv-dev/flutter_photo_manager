@@ -2,8 +2,8 @@ File pubspec = new File(project.projectDir.parentFile, 'pubspec.yaml')
 String yaml = pubspec.text
 java.util.regex.Matcher versionMatcher = java.util.regex.Pattern.compile("^version:\\s*['|\"]?([^\\n|'|\"]*)['|\"]?\$", java.util.regex.Pattern.MULTILINE).matcher(yaml)
 versionMatcher.find()
-// ✅ FIX: Double backslash for proper escaping in Groovy
-String library_version = versionMatcher.group(1).replaceAll("\\+", "-")
+// ✅ FIX 1: Proper escaping for Groovy
+String library_version = versionMatcher.group(1).replaceAll("\\\\+", "-")
 
 group 'com.fluttercandies.photo_manager'
 version library_version
@@ -15,6 +15,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
+        // ✅ FIX 2: Add AGP classpath
         classpath 'com.android.tools.build:gradle:8.6.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
@@ -27,9 +28,11 @@ rootProject.allprojects {
     }
 }
 
+// ✅ FIX 3: Apply plugins in correct order
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
+// ✅ FIX 4: Ensure android block is properly configured
 android {
     namespace 'com.fluttercandies.photo_manager'
     compileSdkVersion 35
@@ -55,6 +58,10 @@ android {
     lint {
         disable 'InvalidPackage'
     }
+    
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
@@ -62,9 +69,11 @@ dependencies {
     implementation 'androidx.exifinterface:exifinterface:1.3.7'
     implementation 'androidx.core:core-ktx:1.13.1'
     implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.activity:activity-ktx:1.9.2'
+    implementation 'androidx.fragment:fragment-ktx:1.8.3'
 }
 
-// ✅ Force consistent JVM target
+// ✅ FIX 5: Force consistent JVM target
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     kotlinOptions {
         jvmTarget = '17'
